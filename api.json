@@ -1,0 +1,20 @@
+{
+	"id": "api",
+	"desiredState": {
+		"manifest": {
+			"version": "2.0.1",
+			"id": "api",
+			"containers": [{
+				"name": "api",
+				"image": "shippable/api",
+				"ports": [{
+					"containerPort": 50000,
+					"hostPort": 50000
+				}]
+			}]
+		}
+	},
+	"labels": {
+		"middleware": "api"
+	}
+}
