@@ -58,7 +58,7 @@ coreos:
         --address=127.0.0.1 \
         --port=10250 \
         --hostname_override=127.0.0.1 \
-        --etcd_servers=http://127.0.0.1:4001 \
+        --etcd_servers=http://$MASTER_IP:4001 \
         --logtostderr=true
         Restart=on-failure
         RestartSec=1
@@ -74,7 +74,9 @@ coreos:
         Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 
         [Service]
-        ExecStart=/opt/bin/proxy --etcd_servers=http://127.0.0.1:4001 --logtostderr=true
+        ExecStart=/opt/bin/proxy \
+        --etcd_servers=http://$MASTER_IP:4001 \
+        --logtostderr=true
         Restart=on-failure
         RestartSec=1
 
