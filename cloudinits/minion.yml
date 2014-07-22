@@ -1,0 +1,82 @@
+#cloud-config
+
+coreos:
+  etcd:
+      # generate a new token for each unique cluster from https://discovery.etcd.io/new
+      # WARNING: replace each time you 'vagrant destroy'
+      discovery: https://discovery.etcd.io/a29371aa84d6fe9b5331f1756a55cbe7
+      addr: $public_ipv4:4001
+      peer-addr: $public_ipv4:7001
+  units:
+    - name: docker-tcp.socket
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Docker Socket for the API
+
+        [Socket]
+        ListenStream=2375
+        Service=docker.service
+        BindIPv6Only=both
+
+        [Install]
+        WantedBy=sockets.target
+    - name: etcd.service
+      command: start
+    - name: fleet.service
+      command: start
+    - name: download-kubernetes.service
+      command: start
+      content: |
+        [Unit]
+        After=network-online.target
+        Before=kubelet.service
+        Before=proxy.service
+        Description=Download Kubernetes Binaries
+        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+        Requires=network-online.target
+        Environment=PATH=/opt/bin/:$PATH
+
+        [Service]
+        ExecStart=/usr/bin/wget -N -P /opt/bin http://storage.googleapis.com/kubernetes/kubelet
+        ExecStart=/usr/bin/wget -N -P /opt/bin http://storage.googleapis.com/kubernetes/proxy
+        ExecStart=/usr/bin/chmod +x /opt/bin/kubelet
+        ExecStart=/usr/bin/chmod +x /opt/bin/proxy
+        RemainAfterExit=yes
+        Type=oneshot
+    - name: kubelet.service
+      command: start
+      content: |
+        [Unit]
+        ConditionFileIsExecutable=/opt/bin/kubelet
+        Description=Kubernetes Kubelet
+        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+        [Service]
+        ExecStart=/opt/bin/kubelet \
+        --address=127.0.0.1 \
+        --port=10250 \
+        --hostname_override=127.0.0.1 \
+        --etcd_servers=http://127.0.0.1:4001 \
+        --logtostderr=true
+        Restart=on-failure
+        RestartSec=1
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: proxy.service
+      command: start
+      content: |
+        [Unit]
+        ConditionFileIsExecutable=/opt/bin/proxy
+        Description=Kubernetes Proxy
+        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+        [Service]
+        ExecStart=/opt/bin/proxy --etcd_servers=http://127.0.0.1:4001 --logtostderr=true
+        Restart=on-failure
+        RestartSec=1
+
+        [Install]
+        WantedBy=multi-user.target
