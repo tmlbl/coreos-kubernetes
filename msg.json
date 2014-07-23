@@ -1,0 +1,26 @@
+{
+	"id": "msg",
+	"desiredState": {
+		"manifest": {
+			"version": "2.0.1",
+			"id": "db",
+			"containers": [{
+				"name": "rabbitmq",
+				"image": "beshippable/msgbase",
+				"ports": [
+					{
+						"containerPort": 5672,
+						"hostPort": 5672
+					},
+					{
+						"containerPort": 15672,
+						"hostPort": 15672
+					}
+				]
+			}]
+		}
+	},
+	"labels": {
+		"services": "rabbitmq"
+	}
+}
