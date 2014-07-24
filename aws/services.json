@@ -1,0 +1,22 @@
+{
+    "items": [
+        {
+            "id": "mongodb",
+            "port": 27017,
+            "labels": {
+                "name": "mongodb"
+            },
+            "selector": {
+                "name": "mongodb"
+            }
+        },
+        {
+            "id": "amqp",
+            "port": 5672,
+            "selector": {
+                "env": "prod",
+                "name": "jetty"
+            }
+        }
+    ]
+}
